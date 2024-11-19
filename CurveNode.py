@@ -4,8 +4,11 @@ import flet.canvas as cv
 class CurveNode(ft.Container):
     def __init__(self, start=[0, 0], end=[0, 0]):
         super().__init__()
-        self.start_x, self.start_y = start[1], start[0]
-        self.end_x, self.end_y = end[1], end[0]
+        self.start_x, self.start_y = start[0], start[1]
+        self.end_x, self.end_y = end[0], end[1]
+
+        self.node_in = None
+        self.node_out = None
 
         self.content = self._content()
 
@@ -31,6 +34,7 @@ class CurveNode(ft.Container):
 
         self.path_elements = []
         segments = 30
+        color_gradient = self._generate_color_gradient(segments)
 
         for i in range(segments):
             t = i / (segments - 1)
@@ -38,9 +42,29 @@ class CurveNode(ft.Container):
             y = (1 - t)**3 * self.start_y + 3 * (1 - t)**2 * t * control_y1 + 3 * (1 - t) * t**2 * control_y2 + t**3 * self.end_y
 
             if i > 0:
-                self.path_elements.append(cv.Line(prev_x, prev_y, x, y, paint=ft.Paint(stroke_width=2, color=ft.colors.BLUE)))
-            
+                self.path_elements.append(
+                    cv.Line(
+                        prev_x,
+                        prev_y,
+                        x,
+                        y,
+                        paint=ft.Paint(stroke_width=2, color=color_gradient[i - 1])
+                    )
+                )
+
             prev_x, prev_y = x, y
 
         self.cp = cv.Canvas(self.path_elements)
         return self.cp
+
+    def _generate_color_gradient(self, segments):
+        gradient = []
+
+        for i in range(segments):
+            ratio = i / (segments - 1)
+            g = int(255 * (1 - ratio))
+            r = int(255 * ratio)
+            gradient.append(f"#{r:02x}{g:02x}00")
+
+        return gradient
+

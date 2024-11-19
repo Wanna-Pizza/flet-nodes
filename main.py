@@ -5,7 +5,7 @@ import flet.canvas as cv
 from CurveNode import CurveNode
 
 class PointConnectOutput(ft.Draggable):
-    def __init__(self,name=''):
+    def __init__(self):
         super().__init__(content = ft.Container(
                     width=20,
                     height=20,
@@ -14,17 +14,19 @@ class PointConnectOutput(ft.Draggable):
                     border=ft.border.all(width=3,color=ft.Colors.GREY_800)
                     ))
         
-        self.name = name
+        self.name = None
+        self.node_data = None
         self.id_node = None
         self.group = 'start'
 
     def did_mount(self):
-        node_data = self.parent.parent.parent.parent
-        print(node_data.id)
-        self.id_node = node_data.id
+        self.node_data = self.parent.parent.parent.parent
+        self.id_node = self.node_data.id
+        self.name = self.node_data.text_label
+
         return super().did_mount()
 class PointConnectInput(ft.DragTarget):
-    def __init__(self,name=''):
+    def __init__(self):
         super().__init__(content=ft.Container(
                     width=20,
                     height=20,
@@ -32,22 +34,41 @@ class PointConnectInput(ft.DragTarget):
                     bgcolor='red',
                     border=ft.border.all(width=3,color=ft.Colors.GREY_800)
                     ))
-        self.name = name
-        self.id_node = None
+        self.name = None
+        self.id_node:Node = None
+        self.node_data = None
+        self.stack_nodes:ft.Stack = None
         self.group='start'
         self.on_accept=self.accept
+
     
-    
-    
-    def accept(self,e:ft.DragTargetAcceptEvent):
+    def accept(self, e: ft.DragTargetAcceptEvent):
         src = self.page.get_control(e.src_id)
+        node = src
+
+        end_x = self.node_data.left
+        end_y = self.node_data.top+self.node_data.height/2
+
+        start_x = node.node_data.left+node.node_data.width
+        start_y = node.node_data.top+node.node_data.height/2
+
+        self.stack_nodes.controls.insert(0,
+            CurveNode(
+                end=[end_x, end_y],
+                start=[start_x, start_y]
+            )
+        )
+        self.stack_nodes.update()
         print(src.name)
-        print(src.node_data)
+        print(src.id_node)
+
     
     def did_mount(self):
-        node_data = self.parent.parent.parent.parent
-        print(node_data.id)
-        self.id_node = node_data.id
+        self.node_data = self.parent.parent.parent.parent
+        self.name = self.node_data.text_label
+        self.id_node = self.node_data.id
+        self.stack_nodes = self.node_data.stack_nodes
+
         return super().did_mount()
 
 
@@ -57,22 +78,24 @@ class Node(ft.GestureDetector):
         super().__init__()
         self.id = Node._id 
         Node._id += 1
+        self.point_w = 20
+
+        self.text_label = f"Stack {self.id}"
 
         self.on_update = on_update
-        self.point_connect_in = PointConnectInput(name='stack')
-        self.point_connect_out = PointConnectOutput(name='stack')
+        self.point_connect_in = PointConnectInput()
+        self.point_connect_out = PointConnectOutput()
         
        
         self.width = 100*4
         self.height = 50*4
         self.top = top
         self.left = left
-        self.text_label = f"Stack {self.id}"
         self.label = ft.Text(self.text_label)
         self.block_draw = ft.Container(
-                        left=10,
+                        left=self.point_w/2,
                         height=self.height,
-                        width=self.width-20,
+                        width=self.width-self.point_w,
                         bgcolor = ft.colors.GREY_900,
                         border = ft.border.all(width=2, color=ft.Colors.GREY_800),
                         border_radius = 5,
@@ -81,7 +104,6 @@ class Node(ft.GestureDetector):
                         )
         self.content = ft.Stack([
             self.block_draw,
-            #inputs
             ft.Column([ft.Row([self.point_connect_in],alignment=ft.MainAxisAlignment.START)],alignment=ft.MainAxisAlignment.CENTER),
             
             ft.Column([ft.Row([self.point_connect_out],alignment=ft.MainAxisAlignment.END)],alignment=ft.MainAxisAlignment.CENTER)
@@ -100,6 +122,10 @@ class Node(ft.GestureDetector):
         self.update()
         if self.on_update:
             self.on_update(self.top,self.left,self.height,self.width)
+    
+    def did_mount(self):
+        self.stack_nodes = self.parent
+        return super().did_mount()
 
 
 class view_node(ft.Stack):
@@ -181,7 +207,7 @@ class view_node(ft.Stack):
 
     def _content(self):
         self.view = ft.Container(border=ft.border.all(width=3,color='white,0.3'),width=4000,height=4000)
-        self.stack_control = ft.Stack([self.node1,self.node2])
+        self.stack_control = ft.Stack([self.node1,self.node2,self.node3,self.node4])
         self.view.content = self.stack_control
         self.ges = ft.GestureDetector(
             content=self.view,
@@ -212,8 +238,12 @@ class view_node(ft.Stack):
         
 
 
-        self.node1 = Node(top=100, left=100)
-        self.node2 = Node(top=150, left=800)
+        self.node1 = Node(top=100, left=150)
+        self.node2 = Node(top=150, left=600)
+        self.node3 = Node(top=500, left=600)
+        self.node4 = Node(top=800, left=600)
+
+        
         # self.curve = CurveNode(start=[100+25,100+100],end=[175,300])
 
 class MainView(ft.Container):
