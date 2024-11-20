@@ -2,10 +2,13 @@ import flet as ft
 import flet.canvas as cv
 
 class CurveNode(ft.Container):
-    def __init__(self, start=[0, 0], end=[0, 0]):
+    def __init__(self, start=[0, 0], end=[0, 0], start_color="#ffffff", end_color="#ff0000"):
         super().__init__()
         self.start_x, self.start_y = start[0], start[1]
         self.end_x, self.end_y = end[0], end[1]
+
+        self.start_color = start_color
+        self.end_color = end_color
 
         self.node_in = None
         self.node_out = None
@@ -22,6 +25,13 @@ class CurveNode(ft.Container):
         self.content = self._content()
         self.update()
 
+    def set_colors(self, start_color, end_color):
+        """Метод для обновления цветов начала и конца."""
+        self.start_color = start_color
+        self.end_color = end_color
+        self.content = self._content()
+        self.update()
+
     def _content(self):
         distance = ((self.end_x - self.start_x)**2 + (self.end_y - self.start_y)**2)**0.5
 
@@ -34,7 +44,7 @@ class CurveNode(ft.Container):
 
         self.path_elements = []
         segments = 30
-        color_gradient = self._generate_color_gradient(segments)
+        color_gradient = self._generate_color_gradient(self.start_color, self.end_color, segments)
 
         for i in range(segments):
             t = i / (segments - 1)
@@ -57,14 +67,24 @@ class CurveNode(ft.Container):
         self.cp = cv.Canvas(self.path_elements)
         return self.cp
 
-    def _generate_color_gradient(self, segments):
+    def _generate_color_gradient(self, start_color, end_color, segments):
+        """Генерация градиента между двумя цветами."""
+        def hex_to_rgb(hex_color):
+            return tuple(int(hex_color[i:i+2], 16) for i in (1, 3, 5))
+
+        def rgb_to_hex(rgb):
+            return f"#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}"
+
+        start_rgb = hex_to_rgb(start_color)
+        end_rgb = hex_to_rgb(end_color)
+
         gradient = []
 
         for i in range(segments):
             ratio = i / (segments - 1)
-            g = int(255 * (1 - ratio))
-            r = int(255 * ratio)
-            gradient.append(f"#{r:02x}{g:02x}00")
+            r = int(start_rgb[0] + (end_rgb[0] - start_rgb[0]) * ratio)
+            g = int(start_rgb[1] + (end_rgb[1] - start_rgb[1]) * ratio)
+            b = int(start_rgb[2] + (end_rgb[2] - start_rgb[2]) * ratio)
+            gradient.append(rgb_to_hex((r, g, b)))
 
         return gradient
-

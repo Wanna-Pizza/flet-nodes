@@ -11,7 +11,7 @@ class PointConnectOutput(ft.Draggable):
                     height=20,
                     shape=ft.BoxShape.CIRCLE,
                     bgcolor='white',
-                    border=ft.border.all(width=3,color=ft.Colors.GREY_800)
+                    border=ft.border.all(width=3,color=ft.colors.GREY_800)
                     ))
         
         self.name = None
@@ -32,7 +32,7 @@ class PointConnectInput(ft.DragTarget):
                     height=20,
                     shape=ft.BoxShape.CIRCLE,
                     bgcolor='red',
-                    border=ft.border.all(width=3,color=ft.Colors.GREY_800)
+                    border=ft.border.all(width=3,color=ft.colors.GREY_800)
                     ))
         self.name = None
         self.id_node:Node = None
@@ -97,7 +97,7 @@ class Node(ft.GestureDetector):
                         height=self.height,
                         width=self.width-self.point_w,
                         bgcolor = ft.colors.GREY_900,
-                        border = ft.border.all(width=2, color=ft.Colors.GREY_800),
+                        border = ft.border.all(width=2, color=ft.colors.GREY_800),
                         border_radius = 5,
                         alignment=ft.alignment.center,
                         content = self.label
