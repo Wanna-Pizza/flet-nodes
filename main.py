@@ -138,9 +138,12 @@ class Node(ft.GestureDetector):
             self.update_curve(curve, pos) for curve, pos in self.curves
         ))
 
-        # Применяем изменения
         self.update()
 
+    async def update_curves(self):
+        await asyncio.gather(*(
+            self.update_curve(curve, pos) for curve, pos in self.curves
+        ))
 
 
     async def update_curve(self, curve, pos):
@@ -176,6 +179,8 @@ class view_node(ft.Stack):
             node.update_block_drawer()
             node.on_update(node.top, node.left, node.height, node.width)
             node.update()
+
+            node.update_curves( )
         except Exception as e:
             pass
 
@@ -259,13 +264,7 @@ class view_node(ft.Stack):
         self.stack_control.update()
 
     def nodes(self):
-        def start_update(top,left,height,width):
-            [left+100,top+25]
-            self.curve.update_curve_top([top+height/2,left+width])
 
-        def end_update(top,left,height,width):
-            self.curve.update_curve_end([top+height/2,left])
-        
 
 
         self.node1 = Node(top=100, left=150)
@@ -274,14 +273,12 @@ class view_node(ft.Stack):
         self.node4 = Node(top=800, left=600)
 
         
-        # self.curve = CurveNode(start=[100+25,100+100],end=[175,300])
 
 class MainView(ft.Container):
     def __init__(self):
         super().__init__()
         self.content = ft.Row([ft.Container(width=200,border=ft.border.all(width=2,color='white,0.2'),border_radius=10),ft.Container(view_node(),expand=True)])
         self.expand = True
-        # self.content = ft.Container(width=100,height=100,bgcolor='red')
 
 
 
