@@ -38,6 +38,7 @@ class PointConnectInput(ft.DragTarget):
         self.id_node:Node = None
         self.node_data = None
         self.stack_nodes:ft.Stack = None
+        self.connections: list = None
         self.group='start'
         self.on_accept=self.accept
 
@@ -51,16 +52,20 @@ class PointConnectInput(ft.DragTarget):
 
         start_x = node.node_data.left+node.node_data.width
         start_y = node.node_data.top+node.node_data.height/2
-
-        self.stack_nodes.controls.insert(0,
-            CurveNode(
+        curve = CurveNode(
                 end=[end_x, end_y],
-                start=[start_x, start_y]
+                start=[start_x, start_y],
+                node_out=self.node_data,
+                node_in=node.node_data
             )
+        self.stack_nodes.controls.insert(0,
+            curve
         )
         self.stack_nodes.update()
-        print(src.name)
-        print(src.id_node)
+        # self.connections.append(curve)
+        self.node_data.curves.append((curve,'out'))
+        node.node_data.curves.append((curve,'in'))
+        
 
     
     def did_mount(self):
@@ -68,6 +73,7 @@ class PointConnectInput(ft.DragTarget):
         self.name = self.node_data.text_label
         self.id_node = self.node_data.id
         self.stack_nodes = self.node_data.stack_nodes
+        self.connections = self.node_data.connections
 
         return super().did_mount()
 
@@ -79,6 +85,11 @@ class Node(ft.GestureDetector):
         self.id = Node._id 
         Node._id += 1
         self.point_w = 20
+
+        self.previous_top = 0
+        self.previous_left = 0
+
+        self.curves = []
 
         self.text_label = f"Stack {self.id}"
 
@@ -111,29 +122,48 @@ class Node(ft.GestureDetector):
             
             ])
         self.on_vertical_drag_update = self.drag_update
+        self.drag_interval = 25
     def update_block_drawer(self):
         self.block_draw.width = self.width-20
         self.block_draw.height = self.height
-       
+    
+
+    async def update_ui(self, e):
+        new_left = self.left + e.delta_x
+        new_top = self.top + e.delta_y
+        self.left = new_left
+        self.top = new_top
+
+        await asyncio.gather(*(
+            self.update_curve(curve, pos) for curve, pos in self.curves
+        ))
+
+        # Применяем изменения
+        self.update()
+
+
+
+    async def update_curve(self, curve, pos):
+        if pos == 'out':
+            curve.update_curve_end()
+        else:
+            curve.update_curve_top()
 
     def drag_update(self, e: ft.DragUpdateEvent):
-        self.top += e.delta_y
-        self.left += e.delta_x
-        self.update()
-        if self.on_update:
-            self.on_update(self.top,self.left,self.height,self.width)
+        self.page.run_task(self.update_ui,e)
+
+            
     
     def did_mount(self):
         self.stack_nodes = self.parent
+        self.connections = self.parent.parent.parent.parent.connections # CONNECTIONS
         return super().did_mount()
-
-
 class view_node(ft.Stack):
     def __init__(self):
         super().__init__()
         self.hover_x = 0
         self.hover_y = 0
-        self.connection = []
+        self.connections = ['LOOL']
         self.nodes()
         self.controls = [self._content()]
     
