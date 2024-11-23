@@ -311,6 +311,7 @@ class view_node(ft.Stack):
         elif e.scroll_delta_y > 0:
             self.view.width = max(50, self.view.width - scale_step)
             self.view.height = max(50, self.view.height - scale_step)
+      
 
         dx = (self.hover_x / prev_width) * scale_step
         dy = (self.hover_y / prev_height) * scale_step
@@ -350,7 +351,8 @@ class view_node(ft.Stack):
             on_vertical_drag_update=self.vert_update,
             top=0,left=0,
             on_scroll=self.zoom,
-            on_hover=self.hover
+            on_hover=self.hover,
+            scale=1
             
             )
         

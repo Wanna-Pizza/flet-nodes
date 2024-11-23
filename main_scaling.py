@@ -3,6 +3,7 @@ import time
 import flet as ft
 import flet.canvas as cv
 from CurveNode import CurveNode
+import numpy as np
 
 class PointConnectOutput(ft.Draggable):
     def __init__(self,id=0):
@@ -293,37 +294,18 @@ class view_node(ft.Stack):
         self.ges.top = self.ges.top + e.delta_y*self.ges.scale
         self.ges.left = self.ges.left + e.delta_x*self.ges.scale
         self.update()
-        
+    
+
+            
     async def zoom_async(self, e: ft.ScrollEvent):
         scale_step = 0.05
-        mouse_x, mouse_y = e.global_x, e.global_y
-        mouse_l_x, mouse_l_y = e.local_x, e.local_y
-        o_left = self.ges.left
-        o_top = self.ges.top
+       
 
         if e.scroll_delta_y < 0:
             self.ges.scale += scale_step
 
         elif e.scroll_delta_y > 0:
             self.ges.scale -= scale_step
-
-
-        original_width = self.view.width
-        scale = self.ges.scale
-
-        scaled_width = original_width * scale
-
-        difference = original_width - scaled_width
-
-        self.page.overlay.append(ft.Container(
-            bgcolor='red',
-            height=10,
-            width=10,
-            top=mouse_y,
-            left=mouse_x
-        ))
-        self.page.update()
-
 
         self.update()
 
