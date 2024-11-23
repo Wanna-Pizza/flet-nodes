@@ -2,8 +2,20 @@ import flet as ft
 import flet.canvas as cv
 
 class CurveNode(ft.Container):
-    def __init__(self, start=[0, 0], end=[0, 0], start_color="#ffffff", end_color="#ff0000",node_in=None,node_out=None ):
+    def __init__(self, 
+                 start=[0, 0], 
+                 end=[0, 0], 
+                 start_color="#ffffff",
+                 end_color="#ff0000",
+                 node_in=None,
+                 node_out=None,
+                 id_in=0,
+                 id_out=0 
+                 
+                 ):
         super().__init__()
+        self.id_input = id_in
+        self.id_output = id_out
         self.start_x, self.start_y = start[0], start[1]
         self.end_x, self.end_y = end[0], end[1]
         self.color_gradient = None
@@ -18,16 +30,11 @@ class CurveNode(ft.Container):
 
         self.content = self._content()
 
-    def update_curve_top(self):
-        x = self.node_in.left+self.node_in.width
-
-        y = self.node_in.top+self.node_in.height/2
+    def update_curve_top(self,x,y):
         self.start_x, self.start_y = x,y
         self._update_curve()
 
-    def update_curve_end(self):
-        x = self.node_out.left
-        y = self.node_out.top+self.node_out.height/2
+    def update_curve_end(self,x,y):
         self.end_x, self.end_y = x, y
         self._update_curve()
 

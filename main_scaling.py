@@ -291,47 +291,37 @@ class view_node(ft.Stack):
 
 
     def vert_update(self, e: ft.DragUpdateEvent):
-        self.ges.top = self.ges.top + e.delta_y
-        self.ges.left = self.ges.left + e.delta_x
+        self.ges.top = self.ges.top + e.delta_y*self.ges.scale
+        self.ges.left = self.ges.left + e.delta_x*self.ges.scale
         self.update()
-    
-    def move(self,y,x):
-        self.ges.top = y
-        self.ges.left = x
-        self.ges.update()
-
+        
     async def zoom_async(self, e: ft.ScrollEvent):
-        scale_step = 50*self.view.width/1000
-        prev_width = self.view.width
-        prev_height = self.view.height
+        scale_step = 0.05
+        mouse_x, mouse_y = e.global_x, e.global_y
 
-        if e.scroll_delta_y < 0:
-            self.view.width += scale_step
-            self.view.height += scale_step
-        elif e.scroll_delta_y > 0:
-            self.view.width = max(50, self.view.width - scale_step)
-            self.view.height = max(50, self.view.height - scale_step)
+        # if e.scroll_delta_y < 0:
+        #     self.ges.scale += scale_step
 
-        dx = (self.hover_x / prev_width) * scale_step
-        dy = (self.hover_y / prev_height) * scale_step
+        # elif e.scroll_delta_y > 0:
+        #     self.ges.scale -= scale_step
+     
+       # Исходные данные
+        original_width = self.view.width  # исходная ширина
+        scale = self.ges.scale  # текущий масштаб
 
-        if e.scroll_delta_y < 0:
-            self.ges.left -= dx
-            self.ges.top -= dy
-        elif e.scroll_delta_y > 0:
-            self.ges.left += dx
-            self.ges.top += dy
+        scaled_width = original_width * scale
 
-        scale_factor = self.view.width / prev_width
+        difference = original_width - scaled_width
 
-        update_tasks = []
-        for node in self.stack_control.controls:
-            task = asyncio.create_task(self.update_node(node, scale_factor))
-            update_tasks.append(task)
+        self.ges.left = mouse_x - (difference / 2)
 
-        await asyncio.gather(*update_tasks)
 
         self.update()
+
+
+
+
+
         
     def hover(self,e:ft.HoverEvent):
         self.hover_x = e.local_x
@@ -350,7 +340,8 @@ class view_node(ft.Stack):
             on_vertical_drag_update=self.vert_update,
             top=0,left=0,
             on_scroll=self.zoom,
-            on_hover=self.hover
+            on_hover=self.hover,
+            scale=1
             
             )
         

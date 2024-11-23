@@ -234,7 +234,7 @@ class Node(ft.GestureDetector):
         self.left *= scale_factor
         self.block_draw.width = self.width
         self.block_draw.height = self.height
-        self.update_links()
+        # self.update_links()
         self.page.run_task(self.async_update_curves)
         self.update()
         
@@ -269,96 +269,69 @@ class Node(ft.GestureDetector):
     
     def did_mount(self):
         self.stack = self.parent
-        self.connections = self.parent.parent.parent.parent.connections
+        self.connections = self.parent.parent.parent.parent.parent.connections
         return super().did_mount()
     
     
 
-class view_node(ft.Stack):
+class view_node(ft.Container):
     def __init__(self):
         super().__init__()
-        self.hover_x = 0
-        self.hover_y = 0
         self.connections = []
+        self.content = ft.InteractiveViewer(
+            content=self._content(),
+            # interaction_end_friction_coefficient=0.01,
+            boundary_margin=1000,
+            constrained=True,
+            min_scale=0.01,
+            max_scale=10,
+            scale_factor=1000,
+            # scale_enabled=False,
+            width=100000,
+            height=100000,
+        )
+        self.scale = None
+        self.border = ft.border.all(2,'red')        
+    def add(self,e):
+        self.content.width = self.content.width+500
+        self.content.update()
+    def _content(self):
+        self.view = ft.Container(border=ft.border.all(width=3,color='white,0.3'),scale=1,bgcolor='red')
+        self.stack_control = ft.Stack([],scale=1)
         self.nodes()
-        self.scale = 1
-        self.controls = [self._content()]
-    
-    async def update_node(self,node, scale_factor):
-        if isinstance(node,Node):
-            node.update_block_drawer(scale_factor)
-    
 
+        self.view.content = self.stack_control
 
-    def vert_update(self, e: ft.DragUpdateEvent):
-        self.ges.top = self.ges.top + e.delta_y
-        self.ges.left = self.ges.left + e.delta_x
-        self.update()
-    
-    def move(self,y,x):
-        self.ges.top = y
-        self.ges.left = x
-        self.ges.update()
-
-    async def zoom_async(self, e: ft.ScrollEvent):
-        scale_step = 50*self.view.width/1000
-        prev_width = self.view.width
-        prev_height = self.view.height
-
-        if e.scroll_delta_y < 0:
-            self.view.width += scale_step
-            self.view.height += scale_step
-        elif e.scroll_delta_y > 0:
-            self.view.width = max(50, self.view.width - scale_step)
-            self.view.height = max(50, self.view.height - scale_step)
-
-        dx = (self.hover_x / prev_width) * scale_step
-        dy = (self.hover_y / prev_height) * scale_step
-
-        if e.scroll_delta_y < 0:
-            self.ges.left -= dx
-            self.ges.top -= dy
-        elif e.scroll_delta_y > 0:
-            self.ges.left += dx
-            self.ges.top += dy
-
-        scale_factor = self.view.width / prev_width
-
-        update_tasks = []
-        for node in self.stack_control.controls:
-            task = asyncio.create_task(self.update_node(node, scale_factor))
-            update_tasks.append(task)
-
-        await asyncio.gather(*update_tasks)
-
-        self.update()
-        
+        self.ges = ft.GestureDetector(
+            content=self.view,
+            # on_vertical_drag_update=self.vert_update,
+            # on_scroll=self.zoom,
+            on_hover=self.hover
+            
+            )
+        return self.ges
     def hover(self,e:ft.HoverEvent):
         self.hover_x = e.local_x
         self.hover_y = e.local_y
     
+    async def zoom_async(self, e: ft.ScrollEvent):
+        self.zoom_factor = 0.1
+        delta = e.scroll_delta_y
+        if delta > 0:
+            self.scale += self.zoom_factor
+        else:
+            self.scale -= self.zoom_factor
+
+        self.scale = max(0.1, min(10.0, self.scale))  # Минимум 0.1, максимум 5.0
+
+        self.update()
     def zoom(self,e):
         self.page.run_task(self.zoom_async,e)
 
-
-    def _content(self):
-        self.view = ft.Container(border=ft.border.all(width=3,color='white,0.3'),width=4000,height=4000)
-        self.stack_control = ft.Stack([self.node1,self.node2])
-        self.view.content = self.stack_control
-        self.ges = ft.GestureDetector(
-            content=self.view,
-            on_vertical_drag_update=self.vert_update,
-            top=0,left=0,
-            on_scroll=self.zoom,
-            on_hover=self.hover
-            
-            )
-        
-        return self.ges
-
     def nodes(self):
-        self.node1 = Node(top=100, left=500)
-        self.node2 = Node(top=350, left=10)
+        for i in range(30):
+            node1 = Node(top=i*500, left=500)
+            self.stack_control.controls.append(node1)
         
       
 
@@ -369,7 +342,6 @@ class MainView(ft.Container):
     def __init__(self):
         super().__init__()
         self.content = view_node()
-        self.expand = True
 
 
 
