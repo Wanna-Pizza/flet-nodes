@@ -4,7 +4,6 @@ import flet as ft
 import flet.canvas as cv
 from CurveNode import CurveNode
 
-from flet import LayoutBuilder
 class PointConnectOutput(ft.Draggable):
     def __init__(self,id=0):
         super().__init__(content = ft.Container(
@@ -298,22 +297,32 @@ class view_node(ft.Stack):
     async def zoom_async(self, e: ft.ScrollEvent):
         scale_step = 0.05
         mouse_x, mouse_y = e.global_x, e.global_y
+        
+        o_left = self.ges.left
+        o_top = self.ges.top
 
-        # if e.scroll_delta_y < 0:
-        #     self.ges.scale += scale_step
+        if e.scroll_delta_y < 0:
+            self.ges.scale += scale_step
 
-        # elif e.scroll_delta_y > 0:
-        #     self.ges.scale -= scale_step
-     
-       # Исходные данные
-        original_width = self.view.width  # исходная ширина
-        scale = self.ges.scale  # текущий масштаб
+        elif e.scroll_delta_y > 0:
+            self.ges.scale -= scale_step
+
+
+        original_width = self.view.width
+        scale = self.ges.scale
 
         scaled_width = original_width * scale
 
         difference = original_width - scaled_width
+        print(difference)
+        
+        new_left = self.ges.left-o_left
+        new_top = self.ges.top-o_top
+        
+        self.ges.left =+ new_left-(difference/2)
+        self.ges.top =+ new_top-(difference/2)
 
-        self.ges.left = mouse_x - (difference / 2)
+
 
 
         self.update()
