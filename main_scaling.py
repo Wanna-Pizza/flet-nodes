@@ -297,7 +297,7 @@ class view_node(ft.Stack):
     async def zoom_async(self, e: ft.ScrollEvent):
         scale_step = 0.05
         mouse_x, mouse_y = e.global_x, e.global_y
-        
+        mouse_l_x, mouse_l_y = e.local_x, e.local_y
         o_left = self.ges.left
         o_top = self.ges.top
 
@@ -314,15 +314,15 @@ class view_node(ft.Stack):
         scaled_width = original_width * scale
 
         difference = original_width - scaled_width
-        print(difference)
-        
-        new_left = self.ges.left-o_left
-        new_top = self.ges.top-o_top
-        
-        self.ges.left =+ new_left-(difference/2)
-        self.ges.top =+ new_top-(difference/2)
 
-
+        self.page.overlay.append(ft.Container(
+            bgcolor='red',
+            height=10,
+            width=10,
+            top=mouse_y,
+            left=mouse_x
+        ))
+        self.page.update()
 
 
         self.update()
@@ -335,13 +335,17 @@ class view_node(ft.Stack):
     def hover(self,e:ft.HoverEvent):
         self.hover_x = e.local_x
         self.hover_y = e.local_y
+
+        self.hover_g_x = e.global_x
+        self.hover_g_y = e.global_y
+        
     
     def zoom(self,e):
         self.page.run_task(self.zoom_async,e)
 
 
     def _content(self):
-        self.view = ft.Container(border=ft.border.all(width=3,color='white,0.3'),width=4000,height=4000)
+        self.view = ft.Container(border=ft.border.all(width=3,color='white,0.3'),width=800,height=800)
         self.stack_control = ft.Stack([self.node1,self.node2])
         self.view.content = self.stack_control
         self.ges = ft.GestureDetector(
