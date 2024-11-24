@@ -294,18 +294,29 @@ class view_node(ft.Stack):
         self.ges.left = self.ges.left + e.delta_x*self.ges.scale
         self.update()
     
-
-            
-    async def zoom_async(self, e: ft.ScrollEvent):
-        scale_step = 0.05
+    def scale_square(self,left_top_x, left_top_y, size, scale):
+        center_x = left_top_x + size / 2
+        center_y = left_top_y + size / 2
         
-
-        if e.scroll_delta_y < 0:
-            self.ges.scale += scale_step
-
-        elif e.scroll_delta_y > 0:
-            self.ges.scale -= scale_step
+        new_size = size * scale
         
+        new_left_top_x = center_x - new_size / 2
+        new_left_top_y = center_y - new_size / 2
+        
+        return new_left_top_x, new_left_top_y
+
+    def reverse_scale_square(self,new_left_top_x, new_left_top_y, new_size, scale):
+        center_x = new_left_top_x + new_size / 2
+        center_y = new_left_top_y + new_size / 2
+        
+        old_size = new_size / scale
+        
+        old_left_top_x = center_x - old_size / 2
+        old_left_top_y = center_y - old_size / 2
+        
+        return old_left_top_x, old_left_top_y, old_size
+
+    def get_size(self):
         original_w = self.ges.width
         new_w = self.ges.width*self.ges.scale
         diff_w = original_w-new_w
@@ -316,27 +327,35 @@ class view_node(ft.Stack):
         diff_h = original_h-new_h
         h_scaled = original_h-diff_h
 
-        S = self.ges.width**2
-        k = self.ges.scale
+        return w_scaled,h_scaled
 
-        new_size = S * k
+            
+    async def zoom_async(self, e: ft.ScrollEvent):
+        scale_step = 0.05
+        
+        scale_def = self.ges.scale
+        if e.scroll_delta_y < 0:
+            self.ges.scale += scale_step
 
-        # Координаты верхнего левого угла после масштабирования
-        top_left_x = (new_size - S) / 2
-        top_left_y = (new_size - S) / 2
-        print(top_left_x)
-   
+        elif e.scroll_delta_y > 0:
+            self.ges.scale -= scale_step
+        
+        view_h = self.page.window.height
+        view_w = self.page.window.width
 
-        # if h_scaled < 900:
-        #     self.page.overlay.clear()
-        #     self.page.overlay.append(
-        #         ft.Container(
-        #             height=h_scaled,
-        #             width=w_scaled,
-        #             border=ft.border.all(width=3,color='red'),
-        #             content=ft.Text('center'),alignment=ft.alignment.center)
-        #     )
-        #     self.page.update()
+        center_x = view_w / 2
+        center_y = view_h / 2
+        
+        w,h = self.get_size()
+        x,y = self.scale_square(left_top_x=self.ges.left,left_top_y=self.ges.top,size=self.ges.width,scale=self.ges.scale)
+        
+
+        delta_x = x - center_x
+        delta_y = y - center_y
+
+        x,y,scale = self.reverse_scale_square(new_left_top_x=delta_x,new_left_top_y=delta_y,new_size=w,scale=w/self.ges.width)
+
+
 
        
         self.update()
@@ -360,7 +379,7 @@ class view_node(ft.Stack):
 
 
     def _content(self):
-        self.view = ft.Container(border=ft.border.all(width=3,color='white,0.3'))
+        self.view = ft.Container(border=ft.border.all(width=3,color='white,0.3'),padding=0)
         self.stack_control = ft.Stack([self.node1,self.node2])
         self.view.content = self.stack_control
         self.ges = ft.GestureDetector(
@@ -369,8 +388,8 @@ class view_node(ft.Stack):
             top=0,left=0,
             on_scroll=self.zoom,
             on_hover=self.hover,
-            width=800*2,
-            height=800*2,
+            width=500,
+            height=500,
             scale=1
             
             )
@@ -389,12 +408,14 @@ class view_node(ft.Stack):
 class MainView(ft.Container):
     def __init__(self):
         super().__init__()
+        self.padding = 0
         self.content = view_node()
         self.expand = True
 
 
 
 def main(page: ft.Page):
+    page.padding = 0
     page.update()
     page.add(MainView())
     
