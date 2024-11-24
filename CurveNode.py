@@ -44,7 +44,7 @@ class CurveNode(ft.Container):
         self.content = self._content()
         self.update()
 
-    def _content(self,update_only=False):
+    def _content(self):
         distance = ((self.end_x - self.start_x)**2 + (self.end_y - self.start_y)**2)**0.5
 
         base_offset = 150
@@ -80,7 +80,7 @@ class CurveNode(ft.Container):
 
 
 
-    def _update_curve(self, update_only=False):
+    def _update_curve(self):
         distance = ((self.end_x - self.start_x)**2 + (self.end_y - self.start_y)**2)**0.5
         base_offset = 150
         control_offset = max(base_offset * (distance / 300), 30)
