@@ -281,7 +281,6 @@ class view_node(ft.Stack):
         self.hover_y = 0
         self.connections = []
         self.nodes()
-        self.scale = 1
         self.controls = [self._content()]
     
     async def update_node(self,node, scale_factor):
@@ -299,15 +298,49 @@ class view_node(ft.Stack):
             
     async def zoom_async(self, e: ft.ScrollEvent):
         scale_step = 0.05
-       
+        
 
         if e.scroll_delta_y < 0:
             self.ges.scale += scale_step
 
         elif e.scroll_delta_y > 0:
             self.ges.scale -= scale_step
+        
+        original_w = self.ges.width
+        new_w = self.ges.width*self.ges.scale
+        diff_w = original_w-new_w
+        w_scaled = original_w-diff_w
 
+        original_h = self.ges.height
+        new_h = self.ges.height*self.ges.scale
+        diff_h = original_h-new_h
+        h_scaled = original_h-diff_h
+
+        S = self.ges.width**2
+        k = self.ges.scale
+
+        new_size = S * k
+
+        # Координаты верхнего левого угла после масштабирования
+        top_left_x = (new_size - S) / 2
+        top_left_y = (new_size - S) / 2
+        print(top_left_x)
+   
+
+        # if h_scaled < 900:
+        #     self.page.overlay.clear()
+        #     self.page.overlay.append(
+        #         ft.Container(
+        #             height=h_scaled,
+        #             width=w_scaled,
+        #             border=ft.border.all(width=3,color='red'),
+        #             content=ft.Text('center'),alignment=ft.alignment.center)
+        #     )
+        #     self.page.update()
+
+       
         self.update()
+
 
 
 
@@ -327,7 +360,7 @@ class view_node(ft.Stack):
 
 
     def _content(self):
-        self.view = ft.Container(border=ft.border.all(width=3,color='white,0.3'),width=800,height=800)
+        self.view = ft.Container(border=ft.border.all(width=3,color='white,0.3'))
         self.stack_control = ft.Stack([self.node1,self.node2])
         self.view.content = self.stack_control
         self.ges = ft.GestureDetector(
@@ -336,6 +369,8 @@ class view_node(ft.Stack):
             top=0,left=0,
             on_scroll=self.zoom,
             on_hover=self.hover,
+            width=800*2,
+            height=800*2,
             scale=1
             
             )
