@@ -91,16 +91,16 @@ class Node(ft.GestureDetector):
         for i in self.out_links:
             i.update_offsets()
         
-    def update_block_drawer(self,scale_factor):
-        self.width *= scale_factor
-        self.height *= scale_factor
-        self.top *= scale_factor
-        self.left *= scale_factor
-        self.block_draw.width = self.width
-        self.block_draw.height = self.height
-        self.update_links()
-        self.page.run_task(self.async_update_curves)
-        self.update()
+    # def update_block_drawer(self,scale_factor):
+    #     self.width *= scale_factor
+    #     self.height *= scale_factor
+    #     self.top *= scale_factor
+    #     self.left *= scale_factor
+    #     self.block_draw.width = self.width
+    #     self.block_draw.height = self.height
+    #     self.update_links()
+    #     self.page.run_task(self.async_update_curves)
+    #     self.update()
         
 
     async def async_update_curves(self):
