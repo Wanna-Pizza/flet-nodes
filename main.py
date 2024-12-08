@@ -59,7 +59,7 @@ class view_node(ft.Stack):
         return w_scaled,h_scaled
 
             
-    async def zoom_async(self, e: ft.ScrollEvent):
+    def zoom_async(self, e: ft.ScrollEvent):
         scale_step = 0.05
         
         scale_def = self.ges.scale
@@ -75,16 +75,17 @@ class view_node(ft.Stack):
         center_x = view_w / 2
         center_y = view_h / 2
         
-        w,h = self.get_size()
-        x,y = self.scale_square(left_top_x=self.ges.left,left_top_y=self.ges.top,size=self.ges.width,scale=self.ges.scale)
+        # # w,h = self.get_size()
+        # # x,y = self.scale_square(left_top_x=self.ges.left,left_top_y=self.ges.top,size=self.ges.width,scale=self.ges.scale)
         
 
-        delta_x = x - center_x
-        delta_y = y - center_y
+        # delta_x = x - center_x
+        # delta_y = y - center_y
 
-        x,y,scale = self.reverse_scale_square(new_left_top_x=delta_x,new_left_top_y=delta_y,new_size=w,scale=w/self.ges.width)
+        # x,y,scale = self.reverse_scale_square(new_left_top_x=delta_x,new_left_top_y=delta_y,new_size=w,scale=w/self.ges.width)
 
         self.update()
+        self.ges.update()
 
 
 
@@ -101,7 +102,7 @@ class view_node(ft.Stack):
         
     
     def zoom(self,e):
-        self.page.run_task(self.zoom_async,e)
+        self.zoom_async(e)
 
 
     def _content(self):
@@ -126,24 +127,12 @@ class view_node(ft.Stack):
         self.node1 = Node(top=100, left=500)
         self.node2 = Node(top=350, left=10)
         
-      
-
-
-        
-
-class MainView(ft.Container):
-    def __init__(self):
-        super().__init__()
-        self.padding = 0
-        self.content = view_node()
-        self.expand = True
-
 
 
 def main(page: ft.Page):
     page.padding = 0
     page.update()
-    page.add(MainView())
+    page.add(view_node())
     
 
 
