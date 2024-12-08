@@ -13,7 +13,7 @@ Zoom occurs from the center of the container. Not from the center of the screen 
 
 ## How to Set Up
 
-Download the archive and run `main_scaling.py`
+Download the archive and run `main.py`
 
 
 ![image](https://github.com/user-attachments/assets/02108106-f2cf-47f2-843e-e1869f6703ec)
