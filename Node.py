@@ -7,13 +7,14 @@ import asyncio
 
 class Node(ft.GestureDetector):
     _id = 1
-    def __init__(self, top=0, left=0,on_update=None,label="Stack",inputs=[],outputs=[]):
+    def __init__(self, top=0, left=0,on_update=None,label="Stack",inputs=[],outputs=[],content_block=None,height=50*4):
         super().__init__()
         self.id = Node._id 
         Node._id += 1
         self.point_w = 20
 
         self.curves = []
+        self.content_block_ = content_block
         self.inputs = inputs
         self.outputs = outputs
         self.offsets_in = []
@@ -24,7 +25,7 @@ class Node(ft.GestureDetector):
         self.on_update = on_update
        
         self.width = 100*4
-        self.height = 50*4
+        self.height = height
         self.top = top
         self.left = left
         self.label = ft.Text(self.text_label)
@@ -51,8 +52,9 @@ class Node(ft.GestureDetector):
                         border_radius = 5,
                         alignment=ft.alignment.center,
                         content = ft.Column([
-                            ft.Container(height=30,bgcolor='black,0.4',content=self.label,alignment=ft.alignment.center)
-                        ])
+                            ft.Container(height=30,bgcolor='black,0.4',content=self.label,alignment=ft.alignment.center),
+                            ft.Container(content=self.content_block_,expand=True,alignment=ft.alignment.center,padding=20),
+                        ],alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
                         )
         return self.block_draw
     def gen_inputs(self):

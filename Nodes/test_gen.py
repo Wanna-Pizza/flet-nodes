@@ -1,3 +1,4 @@
+import textwrap
 def __row(controls):
     controls_str = ',\n    '.join(controls)
     return f'''ft.Row(controls=[\n    {controls_str}\n])'''
@@ -41,7 +42,6 @@ command3 = __stack([command2,text,text1])
 
 command4 = __init_app(command3)
 print(command4.replace("'",''))
-
 
 import flet as ft
 

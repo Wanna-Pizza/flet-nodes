@@ -1,7 +1,7 @@
 import flet as ft
 
 from Node import Node
-from Nodes.TextNode import TextNode
+from Nodes.TextNode import TextNode,ValueInput
 
 
 class view_node(ft.Stack):
@@ -108,7 +108,7 @@ class view_node(ft.Stack):
 
     def _content(self):
         self.view = ft.Container(border=ft.border.all(width=3,color='white,0.3'),padding=0)
-        self.stack_control = ft.Stack([self.node1,self.node2])
+        self.stack_control = ft.Stack([self.node1,self.node2,self.node3])
         self.view.content = self.stack_control
         self.ges = ft.GestureDetector(
             content=self.view,
@@ -126,7 +126,8 @@ class view_node(ft.Stack):
 
     def nodes(self):
         self.node1 = TextNode(top=100, left=500)
-        self.node2 = TextNode(top=350, left=10)
+        self.node2 = ValueInput(top=350, left=10)
+        self.node3 = ValueInput(top=350, left=10)
         
 
 

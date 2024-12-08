@@ -63,10 +63,25 @@ class PointConnectInput(ft.Row):
         self.drag=ft.DragTarget(
                     on_accept=self.accept,
                     group='start',
-                    content=self.builder
+                    content=ft.Draggable(self.builder,on_drag_start=self.remove_link)
                     )
         text = ft.Text(self.text)
         return [self.drag,text]
+    
+    def remove_link(self,e):
+        for i in self.stack.controls:
+            try:
+                if i.id_input == self.control_id_:
+                    if i.id_output == self.id_:
+                        self.stack.controls.remove(i)
+                        self.node.curves.remove([i,'in'])
+                        self.control_.node.curves.remove([i,'out'])
+            except:
+                pass
+        self.stack.update()
+        self.node.update()
+        self.control_.update()
+
 
     def calculate_self_position(self):
         top=self.node.top
@@ -94,7 +109,8 @@ class PointConnectInput(ft.Row):
     def accept(self, e: ft.DragTargetAcceptEvent):
         control = self.page.get_control(e.src_id)
         control: PointConnectOutput
-
+        self.control_id_ = control.id_
+        self.control_ = control
         self.stack: ft.Stack
         left = self.node.left
 

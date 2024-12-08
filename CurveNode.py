@@ -27,7 +27,6 @@ class CurveNode(ft.Container):
 
         self.node_in = node_in
         self.node_out = node_out
-
         self.content = self._content()
 
     def update_curve_top(self,x,y):
