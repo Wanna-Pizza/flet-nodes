@@ -1,6 +1,7 @@
 import flet as ft
 
 from Node import Node
+from Nodes.TextNode import TextNode
 
 
 class view_node(ft.Stack):
@@ -124,8 +125,8 @@ class view_node(ft.Stack):
         return self.ges
 
     def nodes(self):
-        self.node1 = Node(top=100, left=500)
-        self.node2 = Node(top=350, left=10)
+        self.node1 = TextNode(top=100, left=500)
+        self.node2 = TextNode(top=350, left=10)
         
 
 

@@ -7,17 +7,19 @@ import asyncio
 
 class Node(ft.GestureDetector):
     _id = 1
-    def __init__(self, top=0, left=0,on_update=None):
+    def __init__(self, top=0, left=0,on_update=None,label="Stack",inputs=[],outputs=[]):
         super().__init__()
         self.id = Node._id 
         Node._id += 1
         self.point_w = 20
 
         self.curves = []
+        self.inputs = inputs
+        self.outputs = outputs
         self.offsets_in = []
         self.offsets_out = []
 
-        self.text_label = f"Stack {self.id}"
+        self.text_label = f"{label} {self.id}"
         self.stack = None
         self.on_update = on_update
        
@@ -54,7 +56,6 @@ class Node(ft.GestureDetector):
                         )
         return self.block_draw
     def gen_inputs(self):
-        self.inputs = ['Controls','Expand','Aligment','lol']
         self.in_links = []
         column = ft.Column(alignment=ft.MainAxisAlignment.SPACE_BETWEEN,spacing=0)
         column.controls.append(ft.Container(height=30))
@@ -69,7 +70,6 @@ class Node(ft.GestureDetector):
     
     
     def gen_outputs(self):
-        self.outputs = ['Stack','lol','yes']
         self.out_links = []
 
         column = ft.Column(alignment=ft.MainAxisAlignment.SPACE_BETWEEN,spacing=0)
@@ -90,18 +90,6 @@ class Node(ft.GestureDetector):
         self.offsets_out.clear()
         for i in self.out_links:
             i.update_offsets()
-        
-    # def update_block_drawer(self,scale_factor):
-    #     self.width *= scale_factor
-    #     self.height *= scale_factor
-    #     self.top *= scale_factor
-    #     self.left *= scale_factor
-    #     self.block_draw.width = self.width
-    #     self.block_draw.height = self.height
-    #     self.update_links()
-    #     self.page.run_task(self.async_update_curves)
-    #     self.update()
-        
 
     async def async_update_curves(self):
         await asyncio.gather(*(
